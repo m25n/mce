@@ -32,35 +32,31 @@ class Ini {
     
     private function resolveValuesForSection($sections, $section) {
         $section = strtolower($section);
-        $foundSection = false;
-        $resolvedValues = array();
         
         foreach($sections as $name => $values) {
             if(preg_match("/^{$section}/i", $name)) {
                 $foundSection = true;
                 $sectionValues = $this->splitKeys($values);
+                
+                // get parents for this section 
                 $parents = explode(":", $name);
-                array_shift($parents);
-                if(count($parents) > 0) {
+                array_shift($parents); // exclude the name of this section
+                
+                if(count($parents) > 0) { // if it has parents
                     $parentValues = array();
-                    $parents = array_reverse($parents);
-                    foreach($parents as $parent) {
+                    $parents = array_reverse($parents); // order so the deepest parent is first
+                    foreach($parents as $parent) { // start with the deepest parent and progressively replace the values all the way to the closest parent
                         $parentValues = array_replace_recursive($parentValues, $this->resolveValuesForSection($sections, trim($parent)));
                     }
-                    $resolvedValues = array_replace_recursive($parentValues, $sectionValues);
-                } else {
-                    $resolvedValues = $sectionValues;
+                    return array_replace_recursive($parentValues, $sectionValues); // make sure we overwrite the parent values with this section's values
+                } else { // if it doesn't have parents just resolve these values
+                    return $sectionValues;
                 }
-                break;
             }
         }
-        
-        if($foundSection === false) {
-            require_once __DIR__ . "/Ini/Exception/BadSection.php";
-            throw new \Mce\File\Parse\Ini\Exception\BadSection("Section \"" . $section . "\" could not be found.");
-        }
-        
-        return $resolvedValues;
+
+        require_once __DIR__ . "/Ini/Exception/BadSection.php";
+        throw new \Mce\File\Parse\Ini\Exception\BadSection("Section \"" . $section . "\" could not be found.");
     }
     
     private function splitKeys($values) {
