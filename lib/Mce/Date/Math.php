@@ -1,6 +1,8 @@
 <?php
 namespace Mce\Date;
 
+use \Mce\Date\Range\Inclusive as Range;
+
 /**
  * @author Matthew Conger-Eldeen <mceldeen@gmail.com>
  */

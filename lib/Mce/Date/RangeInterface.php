@@ -17,5 +17,11 @@ interface RangeInterface {
      * @return \DateTime the end of the range
      */
     public function getEnd();
+
+    /**
+     * @param  String|\DateTime 
+     * @return bool true if in range and false if not
+     */
+    public function contains(\DateTime $date);
 }
 ?>
