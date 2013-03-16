@@ -1,4 +1,4 @@
-mce
+Mce: A library of useful stuff
 ===
 [![Build Status](https://secure.travis-ci.org/mceldeen/mce.png?branch=master)](http://travis-ci.org/mceldeen/Mce)
 
