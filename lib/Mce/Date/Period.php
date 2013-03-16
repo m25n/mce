@@ -49,7 +49,7 @@ class Period implements \IteratorAggregate
         return $current;
     }
 
-    public function recurrencesBetween(\DateTime $now)
+    private function recurrencesBetween(\DateTime $now)
     {
         if($this->start == $now) return 0;
 
