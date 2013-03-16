@@ -11,11 +11,6 @@
 
 namespace Mce\File\Parse;
 
-require_once dirname( __FILE__ ) . '/../../../../lib/Mce/File/Parse/Ini.php';
-require_once __DIR__ . '/../../../../lib/Mce/File/Exception/NotFound.php';
-require_once __DIR__ . '/../../../../lib/Mce/File/Exception/NotReadable.php';
-require_once __DIR__ . '/../../../../lib/Mce/File/Parse/Ini/Exception/BadSection.php';
-
 use \org\bovigo\vfs\vfsStream as vfsStream;
 use \org\bovigo\vfs\vfsStreamDirectory as vfsStreamDirectory;
 use \org\bovigo\vfs\vfsStreamWrapper as vfsStreamWrapper;

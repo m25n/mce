@@ -11,11 +11,6 @@
 
 namespace Mce\Date;
 
-
-require_once dirname( __FILE__ ) . '/../../../lib/Mce/Date/Period/ForwardIterator.php';
-require_once dirname( __FILE__ ) . '/../../../lib/Mce/Date/Period/ReverseIterator.php';
-require_once dirname( __FILE__ ) . '/../../../lib/Mce/Date/Period.php';
-
 use \DateTime,
     \DateInterval,
     \DateTimeZone,

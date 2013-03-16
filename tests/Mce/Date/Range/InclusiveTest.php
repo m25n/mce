@@ -11,10 +11,6 @@
 
 namespace Mce\Date\Range;
 
-require_once dirname( __FILE__ ) . '/../../../../lib/Mce/Date/RangeInterface.php';
-require_once dirname( __FILE__ ) . '/../../../../lib/Mce/Date/RangeAbstract.php';
-require_once dirname( __FILE__ ) . '/../../../../lib/Mce/Date/Range/Inclusive.php';
-
 use \DateTime,
     \DateInterval,
     \Mce\Date\Range\Inclusive as Range;

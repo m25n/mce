@@ -11,10 +11,6 @@
 
 namespace Mce\Date;
 
-require_once dirname( __FILE__ ) . '/../../../lib/Mce/Date/Math.php';
-require_once dirname( __FILE__ ) . '/../../../lib/Mce/Date/RangeInterface.php';
-require_once dirname( __FILE__ ) . '/../../../lib/Mce/Date/RangeAbstract.php';
-require_once dirname( __FILE__ ) . '/../../../lib/Mce/Date/Range/Inclusive.php';
 use \Mce\Date\Math as DateMath;
 use \DateTime;
 
