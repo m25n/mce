@@ -15,7 +15,6 @@ require_once dirname( __FILE__ ) . '/../../../../lib/Mce/File/Parse/Ini.php';
 require_once __DIR__ . '/../../../../lib/Mce/File/Exception/NotFound.php';
 require_once __DIR__ . '/../../../../lib/Mce/File/Exception/NotReadable.php';
 require_once __DIR__ . '/../../../../lib/Mce/File/Parse/Ini/Exception/BadSection.php';
-require_once 'vfsStream/vfsStream.php';
 
 use \vfsStream as vfsStream;
 use \vfsStreamDirectory as vfsStreamDirectory;
