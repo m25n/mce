@@ -18,7 +18,7 @@ class Period implements \IteratorAggregate
     protected $interval;
     protected $recurrences;
 
-    public function __construct(\DateTime $start, \DateInterval $interval, $recurrences == null, $iteratorClass = '\Mce\Date\Period\ForwardIterator')
+    public function __construct(\DateTime $start, \DateInterval $interval, $recurrences = null, $iteratorClass = '\Mce\Date\Period\ForwardIterator')
     {
         $this->iterator = new $iteratorClass($start, $interval, $recurrences);
         $this->start = $start;
@@ -59,7 +59,7 @@ class Period implements \IteratorAggregate
         return $current;
     }
 
-    private function recurrencesBetween(\DateTime $now)
+    public function recurrencesBetween(\DateTime $now)
     {
         if($this->start == $now) return 0;
 
