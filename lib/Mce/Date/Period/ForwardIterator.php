@@ -51,6 +51,6 @@ class ForwardIterator implements \Iterator
 
     public function valid()
     {
-        return $this->i < ($this->recurrences + 1);
+        return null === $this->recurrences || $this->i < ($this->recurrences + 1);
     }
 }

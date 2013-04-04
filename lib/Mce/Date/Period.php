@@ -18,7 +18,7 @@ class Period implements \IteratorAggregate
     protected $interval;
     protected $recurrences;
 
-    public function __construct(\DateTime $start, \DateInterval $interval, $recurrences, $iteratorClass = '\Mce\Date\Period\ForwardIterator')
+    public function __construct(\DateTime $start, \DateInterval $interval, $recurrences == null, $iteratorClass = '\Mce\Date\Period\ForwardIterator')
     {
         $this->iterator = new $iteratorClass($start, $interval, $recurrences);
         $this->start = $start;
@@ -75,7 +75,7 @@ class Period implements \IteratorAggregate
 
         $m = floor($this->start->diff($now)->days / $d);
         
-        if($m > $this->recurrences) return $this->recurrences;
+        if(null !== $this->recurrences && $m > $this->recurrences) return $this->recurrences;
                
         $current = clone $this->start;
 
