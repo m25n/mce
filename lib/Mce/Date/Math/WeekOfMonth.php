@@ -11,6 +11,8 @@
 
 namespace Mce\Date\Math;
 
+use \Mce\Date\Range\Inclusive as InclusiveRange;
+
 /**
  * Useful utilities for week math
  *
@@ -25,7 +27,7 @@ class WeekOfMonth {
      * @param \DateTime $date
      * @param int $weekStart ISO-8601 numeric representation of the day of the 
      *                       week (1 = Monday,..., 7 = Sunday)
-     * @return \Mce\Date\Range 
+     * @return \Mce\Date\Range\Inclusive
      */
     public static function getRangeFromDate(\DateTime $date, $weekStart = 1) {
         $dayOfWeek = intval($date->format("N"));    
@@ -45,7 +47,7 @@ class WeekOfMonth {
         $end->add(new \DateInterval("P6D"));
         $end->setTime(23, 59, 59);
         
-        return new \Mce\Date\Range($start, $end);
+        return new InclusiveRange($start, $end);
     }
     
     /**
@@ -55,17 +57,21 @@ class WeekOfMonth {
      * @param \DateTime $month Any date time within the month you want
      * @param int $weekStart ISO-8601 numeric representation of the day of the 
      *                       week (1 = Monday,..., 7 = Sunday)
-     * @return \Mce\Date\Range 
+     * @return \Mce\Date\Range\Inclusive
      */
     public static function getRangeFromNumber($weekOfMonth, \DateTime $month, $weekStart = 1) {
         // find the week day of the first of the month and add $weekOfMonth - 1 weeks to it 
-        $start = \Date\Math\Month::getNWeekday($weekOfMonth, $weekStart, $month);
+        try {
+            $start = Month::getNWeekday($weekOfMonth, $weekStart, $month);
+        } catch(\RangeException $e) {
+            throw new \RangeException("{$month->format('F Y')} does not have {$weekOfMonth} weeks (week start = {$weekStart}");
+        }
         
         $end = clone $start;
         $end->add(new \DateInterval("P6D"));
         $end->setTime(23, 59, 59);
         
-        return new \Mce\Date\Range($start, $end);
+        return new InclusiveRange($start, $end);
     }
     
     /**
@@ -75,18 +81,19 @@ class WeekOfMonth {
      * @param \DateTime $date 
      * @param int $weekStart ISO-8601 numeric representation of the day of the 
      *                       week (1 = Monday,..., 7 = Sunday)
-     * @return int 
+     * @return Array(int, int, int) tuple with format (year, month, week) 
      */
     public static function getNumber(\DateTime $date, $weekStart = 1) {
-        $firstWeekdayOfMonth = \Date\Math\Month::getFirstWeekday($weekStart, $date);
+        $firstWeekdayOfMonth = Month::getFirstWeekday($weekStart, $date);
         $firstDay = intval($firstWeekdayOfMonth->format("j"));
-        
         $currentDay = intval($date->format("j"));
         
         if($currentDay >= $firstDay) { // we're in the current month  
-            return (int)floor(($currentDay - $firstDay) / 7) + 1;
+            $year = intval($firstWeekdayOfMonth->format('Y'));
+            $month = intval($firstWeekdayOfMonth->format('n'));
+            return array($year, $month, intval(floor(($currentDay - $firstDay) / 7) + 1));
         } else { // we're in the previous month's last week
-            return self::getMaxNumber($firstWeekdayOfMonth->sub(new \DateInterval("P7D")), $weekStart); // so caclulate the week number of the previous month
+            return self::getNumber($firstWeekdayOfMonth->sub(new \DateInterval('P7D')), $weekStart); // so caclulate the week number of the previous month
         }
     }
     
@@ -99,9 +106,9 @@ class WeekOfMonth {
      * @return int 
      */
     public static function getMaxNumber(\DateTime $month, $weekStart = 1) {
-        $firstWeekdayOfMonth = \Date\Math\Month::getFirstWeekday($weekStart, $date);
+        $firstWeekdayOfMonth = Month::getFirstWeekday($weekStart, $month);
         $firstDay = intval($firstWeekdayOfMonth->format("j"));
-        $lastDay = intval($date->format("t"));
+        $lastDay = intval($month->format("t"));
         
         return (int)floor(($lastDay - $firstDay) / 7) + 1;
     }

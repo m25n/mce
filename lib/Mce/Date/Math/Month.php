@@ -11,6 +11,8 @@
 
 namespace Mce\Date\Math;
 
+use \Mce\Date\Range\Inclusive as InclusiveRange;
+
 /**
  * Useful utilities for month math
  *
@@ -27,7 +29,7 @@ class Month {
         $start = new \DateTime($date->format("Y-m-01 00:00:00"), $date->getTimezone());
         $end = new \DateTime($date->format("Y-m-t 23:59:59"), $date->getTimezone());
         
-        return new \Mce\Date\Range($start, $end);
+        return new InclusiveRange($start, $end);
     }
     
     /**
@@ -41,7 +43,7 @@ class Month {
         $firstOfMonth = new \DateTime($month->format("Y-m-01 00:00:00"), $month->getTimezone());
         $firstOfMonthWeekday = intval($firstOfMonth->format("N"));
        
-        $dayOfFirstWeekday = 1 + ($weekDay <= $firstOfMonthWeekday ? 7:0) + $weekDay - $firstOfMonthWeekday;
+        $dayOfFirstWeekday = 1 + ($weekDay < $firstOfMonthWeekday ? 7:0) + $weekDay - $firstOfMonthWeekday;
         
         $firstWeekdayOfMonth = clone $firstOfMonth;
         $firstWeekdayOfMonth->setTime(0, 0, 0);
@@ -60,9 +62,16 @@ class Month {
      */
     public static function getNWeekday($n, $weekDay, \DateTime $month) {
         $weekdayOfMonth = self::getFirstWeekday($weekDay, $month);
-        $weekdayOfMonth->add(new \DateInterval("P" . (($n - 1) * 7) . "D"));
+
+        if($n === 1) return $weekdayOfMonth;
+
+        $weekdayOfMonth->add(new \DateInterval("P" . ($n - 1) . "W"));
+
+        $monthStr = $month->format('F Y');
+        if($weekdayOfMonth->format('F Y') !== $monthStr) {
+            throw new \RangeException("{$monthStr} does not have {$n} {$weekdayOfMonth->format('l')}s");
+        }
         
         return $weekdayOfMonth;
     }
 }
-?>
