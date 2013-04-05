@@ -23,7 +23,7 @@ class Period implements \IteratorAggregate
         $this->iterator = new $iteratorClass($start, $interval, $recurrences);
         $this->start = $start;
         $this->interval = $interval;
-        $this->recurrences = intval($recurrences);
+        $this->recurrences = null === $recurrences ? null:intval($recurrences);
     }
 
     public function getIterator()
@@ -94,7 +94,7 @@ class Period implements \IteratorAggregate
 
         $extra = 0;
         while($now > $current) {
-            if($m + $extra >= $this->recurrences) return $this->recurrences;
+            if(null !== $recurrences && $m + $extra >= $this->recurrences) return $this->recurrences;
             $extra++;
             $current->add($this->interval);
         }

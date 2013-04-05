@@ -156,4 +156,17 @@ class PeriodTest extends \PHPUnit_Framework_TestCase
         $this->assertEquals(9, $period->recurrencesBetween(new DateTime('2012-12-10 00:00:00', $tz)));
         $this->assertEquals(4, $period->recurrencesBetween(new DateTime('2012-12-05 00:00:00', $tz)));
     }
+
+    public function testInfinity()
+    {
+        $tz = new DateTimeZone('GMT');
+        $start = new DateTime('2013-01-01 00:00:00', $tz);
+        $interval = new DateInterval('P1D');
+        $recurrences = 300;
+
+        $period = new DatePeriod($start, $interval);
+        
+        // assert that dates stop after the maximum number of reccurences
+        $this->assertEquals(300, $period->recurrencesBetween(new DateTime('2013-10-28 00:00:00', $tz)));
+    }
 }
