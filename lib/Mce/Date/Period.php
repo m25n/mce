@@ -92,14 +92,14 @@ class Period implements \IteratorAggregate
             ));
         }
 
-        $extra = 0;
-        while($now > $current) {
-            if(null !== $recurrences && $m + $extra >= $this->recurrences) return $this->recurrences;
+        $extra = -1;
+        while($now >= $current) {
+            if(null !== $this->recurrences && $m + $extra >= $this->recurrences) return $this->recurrences;
             $extra++;
             $current->add($this->interval);
         }
         $m += $extra;
         
-        return $m;
+        return intval($m);
     }
 }
