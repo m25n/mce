@@ -8,3 +8,4 @@ php:
 branches:
   only:
     - master
+    - monad
