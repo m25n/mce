@@ -25,7 +25,7 @@ class CsvTest extends \PHPUnit_Framework_TestCase {
      * @var Csv
      */
     protected $csv;
-    
+
     protected $largeCsv;
 
     /**
@@ -34,8 +34,9 @@ class CsvTest extends \PHPUnit_Framework_TestCase {
      */
     protected function setUp() {
         $this->csv = new Csv;
-        $this->largeCsv = realpath(__DIR__ . "/../../../data/LargeCsv.csv");
-        
+        $this->largeCsv = realpath(__DIR__ . "/../../../data/Large.csv");
+        $this->smallCsv = realpath(__DIR__ . "/../../../data/Small.csv");
+
         vfsStreamWrapper::register();
         vfsStreamWrapper::setRoot(new vfsStreamDirectory('root'));
     }
@@ -58,48 +59,48 @@ class CsvTest extends \PHPUnit_Framework_TestCase {
         vfsStream::newFile('NonReadableFile.csv', 0333)->at(vfsStreamWrapper::getRoot());
         $this->csv->parse(vfsStream::url('root/NonReadableFile.csv'));
     }
-       
-    public function testParseReturnsRowsMinusOneWithHeaderRow() {       
-        $actualRows = (10000 - 1);
-        $rows = $this->csv->parse($this->largeCsv);
+
+    public function testParseReturnsRowsMinusOneWithHeaderRow() {
+        $actualRows = 10;
+        $rows = $this->csv->parse($this->smallCsv);
         $this->assertTrue($rows == $actualRows, "Csv::parse returned " . $rows . " rows instead of the correct " . $actualRows . " rows.");
     }
-    
-    public function testParseReturnsRowsWithoutHeaderRow() {       
-        $actualRows = 10000;
-        $rows = $this->csv->parse($this->largeCsv, false);
+
+    public function testParseReturnsRowsWithoutHeaderRow() {
+        $actualRows = 11;
+        $rows = $this->csv->parse($this->smallCsv, false);
         $this->assertTrue($rows == $actualRows, "Csv::parse returned " . $rows . " rows instead of the correct " . $actualRows . " rows.");
     }
-    
+
     public function testSetCallbackReturnsThis() {
         $callback = function($n , $row) { };
         $this->assertTrue($this->csv->setCallback($callback) === $this->csv);
     }
-    
+
     public function testParseCallsCallbackForEachRow() {
         $rows = 0;
         $callback = function($n , $row) use(&$rows) {
             $rows++;
         };
         $this->csv->setCallback($callback);
-        
-        $actualRows = 10000;
-        $this->csv->parse($this->largeCsv, false);
+
+        $actualRows = 11;
+        $this->csv->parse($this->smallCsv, false);
         $this->assertTrue($rows == $actualRows, "The callback was called for " . $rows . " rows instead of the correct " . $actualRows . " rows.");
     }
-    
+
     public function testParseCallsCallbackForEachRowExcludingHeader() {
         $rows = 0;
         $callback = function($n , $row) use(&$rows) {
             $rows++;
         };
         $this->csv->setCallback($callback);
-        
-        $actualRows = (10000 - 1);
-        $this->csv->parse($this->largeCsv);
+
+        $actualRows = 10;
+        $this->csv->parse($this->smallCsv);
         $this->assertTrue($rows == $actualRows, "The callback was called for " . $rows . " rows instead of the correct " . $actualRows . " rows.");
     }
-    
+
     public function testParseCallsCallbackWithCorrectData() {
         $rows = 0;
         $csvColumns = 3;
@@ -111,12 +112,12 @@ class CsvTest extends \PHPUnit_Framework_TestCase {
             $rows++;
         };
         $this->csv->setCallback($callback);
-        
-        $actualRows = (10000 - 1);
-        $this->csv->parse($this->largeCsv);
+
+        $actualRows = 10;
+        $this->csv->parse($this->smallCsv);
         $this->assertTrue($success, "The callback was not passed the correct data.");
     }
-    
+
     public function testParseUsesHeadersWhenSet() {
         $success = true;
         $callback = function($n, $row) use(&$success) {
@@ -125,10 +126,10 @@ class CsvTest extends \PHPUnit_Framework_TestCase {
             }
         };
         $this->csv->setCallback($callback)
-                  ->parse($this->largeCsv);
+                  ->parse($this->smallCsv);
         $this->assertTrue($success, "The correct headers were not set.");
     }
-    
+
     public function testParseDoesNotUseHeadersWhenNotSet() {
         $success = true;
         $callback = function($n, $row) use(&$success) {
@@ -137,7 +138,59 @@ class CsvTest extends \PHPUnit_Framework_TestCase {
             }
         };
         $this->csv->setCallback($callback)
-                  ->parse($this->largeCsv, false);
+                  ->parse($this->smallCsv, false);
         $this->assertTrue($success, "The headers were set when they weren't supposed to.");
+    }
+
+    public function testCanGetErrorMessageWhenValidateHeadersIsSet()
+    {
+        $parsed = $this->csv
+            ->setHeaderValidator(function($columns) {
+                if(count($columns) < 4) {
+                    return 'Not enough columns';
+                }
+            })
+            ->parse($this->smallCsv, true);
+
+        $this->assertEquals(0, $parsed, 'The validator returned an error, no rows should be parsed');
+        $this->assertEquals('Not enough columns', $this->csv->getHeaderError(), 'The error returned should be "Not enough columns"');
+
+        // make sure the error clears
+        $parsed = $this->csv->setHeaderValidator(function($columns) { return ""; })->parse($this->smallCsv, true);
+        $this->assertEquals(10, $parsed, 'All rows should be parsed the rows correctly');
+        $this->assertEquals('', $this->csv->getHeaderError(), 'The error returned should be empty');
+    }
+
+    public function testRowValidator()
+    {
+        $parsed = $this->csv
+            ->setValidator(function($row) {
+                if(is_numeric($row['foo'])) {
+                    return 'Name should not be number';
+                }
+            })
+            ->parse($this->smallCsv, true);
+
+
+        $this->assertEquals(10, count($this->csv->getErrors()));
+        $i = 1;
+        foreach($this->csv->getErrors() as $err) {
+            $this->assertEquals($i, $err['line'], "Line number should be \"$i\"");
+            $this->assertEquals("Name should not be number", $err['message'], "Message should be \"Name should not be number\"");
+            $i++;
+        }
+    }
+
+    public function testRowValidatorSampling()
+    {
+        $sampled = 0;
+        $parsed = $this->csv
+            ->setValidateRate(10)
+            ->setValidator(function($row) use(&$sampled) {
+                $sampled++;
+            })
+            ->parse($this->largeCsv, true);
+
+        $this->assertEquals(intval(9999 / 10) + 1, $sampled, "The validator should only sample a subset");
     }
 }

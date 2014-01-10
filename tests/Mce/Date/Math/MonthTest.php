@@ -20,13 +20,14 @@ use \Mce\Date\Range\Inclusive as InclusiveRange;
  */
 class MonthTest extends \PHPUnit_Framework_TestCase
 {
-    
+
     /**
      * Sets up the fixture, for example, opens a network connection.
      * This method is called before a test is executed.
      */
     protected function setUp ()
-    { 
+    {
+        date_default_timezone_set("UTC");
     }
 
     /**
@@ -80,7 +81,7 @@ class MonthTest extends \PHPUnit_Framework_TestCase
 
         foreach($tests as $name => $test) {
             $actual = Month::getFirstWeekDay($test['weekday'], $test['month']);
-            $this->assertEquals($actual, $test['expected'], "$name test case failed"); 
+            $this->assertEquals($actual, $test['expected'], "$name test case failed");
         }
     }
 
